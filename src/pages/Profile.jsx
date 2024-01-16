@@ -1,11 +1,20 @@
 import { useState } from "react"
+import { getAuth } from "firebase/auth"
+import { useNavigate } from "react-router-dom"
 
 export default function Profile() {
+  const auth = getAuth()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    name: "Andre",
-    email: "andre@andre.com",
+    name: auth.currentUser.displayName,
+    email: auth.currentUser.email,
   })
   const { name, email } = formData
+
+  function onLogout() {
+    auth.signOut()
+    navigate("/")
+  }
 
   return (
     <>
@@ -19,7 +28,7 @@ export default function Profile() {
               id="name"
               value={name}
               disabled
-              className="w-full px-4 py-2 text-xl text-gray-700 bg-white border border-grey-300 rounded transition ease-in-out"
+              className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-grey-300 rounded transition ease-in-out"
             />
 
             {/* Email input */}
@@ -28,8 +37,23 @@ export default function Profile() {
               id="email"
               value={email}
               disabled
-              className="w-full px-4 py-2 text-xl text-gray-700 bg-white border border-grey-300 rounded transition ease-in-out"
+              className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-grey-300 rounded transition ease-in-out"
             />
+
+            <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg mb-6 ">
+              <p className="flex items-center">
+                Do you want to change your name?
+                <span className="ml-1 text-red-600 hover:text-red-800 transition  ease-in-out duration-150 cursor-pointer">
+                  Edit
+                </span>
+              </p>
+              <p
+                onClick={onLogout}
+                className="text-blue-600 hover:text-blue-800 transition  ease-in-out duration-150 cursor-pointer"
+              >
+                Sign out
+              </p>
+            </div>
           </form>
         </div>
       </section>
