@@ -28,7 +28,29 @@ export default function CreateListing() {
     discountedPrice,
   } = formData
 
-  function onChange() {}
+  function onChange(e) {
+    let boolean = null
+    if (e.target.value === "true") {
+      boolean = true
+    }
+    if (e.target.value === "false") {
+      boolean = false
+    }
+    //Files
+    if (e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        images: e.target.files,
+      }))
+    }
+    //Test / Boolean
+    if (!e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        [e.target.id]: boolean ?? e.target.value,
+      }))
+    }
+  }
 
   return (
     <main className="max-w-md px-2 mx-auto">
@@ -52,7 +74,7 @@ export default function CreateListing() {
           <button
             type="button"
             id="type"
-            value="sale"
+            value="rent"
             onClick={onChange}
             className={`ml-3 px-7 py-3 font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
               type === "sale"
