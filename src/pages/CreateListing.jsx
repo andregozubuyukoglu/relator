@@ -1,8 +1,21 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import Spinner from "../components/Spinner"
 import { toast } from "react-toastify"
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage"
+import { getAuth } from "firebase/auth"
+import { v4 as uuidv4 } from "uuid"
+import { addDoc, collection, serverTimestamp } from "firebase/firestore"
+import { db } from "../firebase"
+import { useNavigate } from "react-router-dom"
 
 export default function CreateListing() {
+  const navigate = useNavigate()
+  const auth = getAuth()
   const [geolocationEnabled, setGeolocationEnabled] = useState(true)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -97,6 +110,62 @@ export default function CreateListing() {
       geolocation.lat = latitude
       geolocation.lng = longitude
     }
+
+    async function storeImage(image) {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage()
+        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
+        const storageRef = ref(storage, fileName)
+        const uploadTask = uploadBytesResumable(storageRef, image)
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            console.log("Upload is " + progress + "% done")
+            // eslint-disable-next-line default-case
+            switch (snapshot.state) {
+              case "paused":
+                console.log("Upload is paused")
+                break
+              case "running":
+                console.log("Upload is running")
+                break
+            }
+          },
+          (error) => {
+            reject(error)
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL)
+            })
+          }
+        )
+      })
+    }
+
+    const imgUrls = await Promise.all(
+      [...images].map((image) => storeImage(image))
+    ).catch((error) => {
+      setLoading(false)
+      toast.error("Images not uploaded")
+      return
+    })
+    const formDataCopy = {
+      ...formData,
+      imgUrls,
+      geolocation,
+      timestamp: serverTimestamp(),
+    }
+    delete formDataCopy.images
+    delete formDataCopy.latitude
+    delete formDataCopy.longitude
+    !formDataCopy.offer && delete formDataCopy.discountedPrice
+    const docRef = await addDoc(collection(db, "listings"), formDataCopy)
+    setLoading(false)
+    toast.success("Listings created successfully")
+    navigate(`/category/${formDataCopy.type}/${docRef.id}`)
   }
 
   if (loading) {
