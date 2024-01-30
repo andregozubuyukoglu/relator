@@ -61,26 +61,22 @@ export default function Profile() {
 
   useEffect(() => {
     async function fetchUserListings() {
-      try {
-        const listingRef = collection(db, "listings")
-        const q = query(
-          listingRef,
-          where("userRef", "==", auth.currentUser.uid),
-          orderBy("timestamp", "desc")
-        )
-        const querySnap = await getDocs(q)
-        let listings = []
-        querySnap.forEach((doc) => {
-          return listings.push({
-            id: doc.id,
-            data: doc.data(),
-          })
+      const listingRef = collection(db, "listings")
+      const q = query(
+        listingRef,
+        where("userRef", "==", auth.currentUser.uid),
+        orderBy("timestamp", "desc")
+      )
+      const querySnap = await getDocs(q)
+      let listings = []
+      querySnap.forEach((doc) => {
+        return listings.push({
+          id: doc.id,
+          data: doc.data(),
         })
-        setListings(listings)
-        setLoading(false)
-      } catch (error) {
-        console.log(error)
-      }
+      })
+      setListings(listings)
+      setLoading(false)
     }
     fetchUserListings()
   }, [auth.currentUser.uid])
@@ -141,13 +137,13 @@ export default function Profile() {
               to="/create-listing"
               className="flex justify-center items-center"
             >
-              <FaHome className="mr-3 text-3xl bg-red-200 rounded-full p-1 border-2" />
+              <FaHome className="mr-2 text-3xl bg-red-200 rounded-full p-1 border-2" />
               Sell or rent your home
             </Link>
           </button>
         </div>
       </section>
-      <div>
+      <div className="max-w-6xl px-3 mt-6 mx-auto">
         {!loading && listings.length > 0 && (
           <>
             <h2 className="text-2xl text-center font-semibold mb-6">
