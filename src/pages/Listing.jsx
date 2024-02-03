@@ -73,6 +73,13 @@ export default function Listing() {
           Link Copied
         </p>
       )}
+
+      <div className="m-4 flex flex-col md:flex-row max-w-6xl lg:mx-auto p-4 rounded-lg border-3 shadow-lg bg-white lg:space-x-5">
+        <div className="w-full h-[200px] lg-[400px]">
+          <p></p>
+        </div>
+        <div className="w-full h-[200px] lg-[400px] z-10 overflow-x-hidden"></div>
+      </div>
     </main>
   )
 }
